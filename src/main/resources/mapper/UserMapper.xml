@@ -2,9 +2,9 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.example.flabcaloriecounter.user.adapter.out.persistence.UserMapper">
+<mapper namespace="com.example.caloriecounter.user.mapper.UserMapper">
     <insert id="signUp"
-            parameterType="com.example.flabcaloriecounter.user.application.port.in.response.SignUpForm">
+            parameterType="com.example.caloriecounter.user.controller.dto.request.SignUpForm">
         INSERT INTO user_table(USER_ID, user_name, user_password, email)
         values (#{userId}, #{userName}, #{userPassword}, #{email});
         <selectKey keyColumn="id" keyProperty="id" resultType="long" order="AFTER">
@@ -16,7 +16,7 @@
         SELECT EXISTS(select user_id from user_table where user_id = #{userId})
     </select>
 
-    <select id="findByUserId" resultType="com.example.flabcaloriecounter.user.domain.User">
+    <select id="findByUserId" resultType="com.example.caloriecounter.user.domain.User">
         SELECT ID,
                user_id,
                user_name,

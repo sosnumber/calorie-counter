@@ -1,7 +1,88 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.flabcaloriecounter.feed.adapter.out.persistence.CommentMapper">
+<mapper namespace="com.example.caloriecounter.comment.mapper.CommentMapper">
+
+    <insert id="insertComment"
+            parameterType="com.example.caloriecounter.comment.controller.request.CommentRequestDto">
+        INSERT INTO COMMENT(FEED_ID, CONTENTS, USER_ID, GROUP_NUMBER)
+        values (#{feedId}, #{commentRequestDto.contents}, #{userId}, #{commentRequestDto.groupNumber})
+        <selectKey keyColumn="COMMENT_ID" keyProperty="commentRequestDto.commentId" resultType="long" order="AFTER">
+            select last_insert_id()
+        </selectKey>
+    </insert>
+
+    <insert id="insertReply"
+            parameterType="com.example.caloriecounter.comment.controller.request.ReplyDto">
+        INSERT INTO COMMENT(FEED_ID, USER_ID, CONTENTS, PARENT_ID, DEPTH, GROUP_NUMBER, GROUP_REFORDER)
+        values (#{replyDto.feedId}, #{replyDto.userId}, #{replyDto.contents}, #{replyDto.parentId}, #{replyDto.depth},
+        #{replyDto.groupNumber},#{replyDto.refOrder})
+        <selectKey keyColumn="COMMENT_ID" keyProperty="replyDto.commentId" resultType="long" order="AFTER">
+            select last_insert_id()
+        </selectKey>
+    </insert>
+
+    <select id="comment" resultType="com.example.caloriecounter.comment.domain.Comment">
+        select c.comment_id,
+        c.feed_id,
+        c.writeDate,
+        c.contents,
+        c.parent_id,
+        c.depth,
+        c.USER_ID,
+        c.GROUP_NUMBER,
+        c.GROUP_REFORDER,
+        c.CHILD_NUMBER
+        from comment c
+        inner join user_table u on u.id = c.user_id
+        where feed_id = #{feedId}
+        order by c.group_number, c.GROUP_REFORDER
+        limit #{offset},#{commentPerPage};
+    </select>
+
+    <select id="findCommentById" parameterType="Long"
+            resultType="com.example.caloriecounter.comment.domain.Comment">
+        select COMMENT_ID,
+        FEED_ID,
+        WRITEDATE,
+        CONTENTS,
+        PARENT_ID,
+        DEPTH,
+        USER_ID,
+        GROUP_NUMBER,
+        GROUP_REFORDER,
+        CHILD_NUMBER
+        from comment
+        where COMMENT_ID = #{parentId}
+    </select>
+
+
+    <select id="maxDepth" resultType="int">
+        select Max(DEPTH)
+        from COMMENT
+        where GROUP_NUMBER = #{groupNumber}
+    </select>
+
+    <select id="countParent" parameterType="long" resultType="int">
+        select count(*)
+        from COMMENT
+        where FEED_ID = #{feedId}
+        and DEPTH = 0
+    </select>
+
+
+    <update id="updateRefOrder">
+        update COMMENT
+        set GROUP_REFORDER = GROUP_REFORDER + 1
+        where GROUP_NUMBER = #{groupNumber}
+        and GROUP_REFORDER &gt; #{parentOrderResult}
+    </update>
+
+    <update id="updateChild">
+        update COMMENT
+        set CHILD_NUMBER = CHILD_NUMBER + 1
+        where COMMENT_ID = #{parentId}
+    </update>
 
     <delete id="delete" parameterType="long">
         delete
