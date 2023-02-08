@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: "test"
+    active: local
 
   redis:
     host: localhost
@@ -14,7 +14,7 @@ jwt:
 # mybatis
 mybatis:
   mapper-locations: classpath:/mapper/*.xml
-  type-handlers-package: com.example.flabcaloriecounter.util
+  type-handlers-package: com.example.caloriecounter.util
 
 file:
   dir: "C:\\Users\\dudwl\\OneDrive\\바탕 화면\\calorie-counter\\"
