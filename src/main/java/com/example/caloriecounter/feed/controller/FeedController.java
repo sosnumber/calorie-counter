@@ -15,15 +15,15 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.caloriecounter.comment.controller.request.CommentRequestDto;
+import com.example.caloriecounter.comment.controller.response.CommentResponseDto;
 import com.example.caloriecounter.comment.service.CommentService;
 import com.example.caloriecounter.config.UserAuthentication;
 import com.example.caloriecounter.exception.CustomException;
-import com.example.caloriecounter.comment.controller.request.CommentRequestDto;
 import com.example.caloriecounter.feed.controller.dto.request.FeedDto;
 import com.example.caloriecounter.feed.controller.dto.request.FeedListDto;
 import com.example.caloriecounter.feed.controller.dto.request.GetFeedListDto;
 import com.example.caloriecounter.feed.controller.dto.request.Paging;
-import com.example.caloriecounter.comment.controller.response.CommentResponseDto;
 import com.example.caloriecounter.feed.service.FeedService;
 import com.example.caloriecounter.like.service.LikeService;
 import com.example.caloriecounter.util.CustomResponse;

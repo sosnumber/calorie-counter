@@ -49,7 +49,11 @@ public class FeedRepository {
 		return this.feedMapper.getFeedList(paging);
 	}
 
-	public long maxCursor() {
+	public Long maxCursor() {
 		return this.feedMapper.maxCursor();
+	}
+
+	public void deleteAll() {
+		this.feedMapper.deleteAll();
 	}
 }

@@ -1,15 +1,20 @@
 package com.example.caloriecounter.feed.controller;
 
-import static com.example.caloriecounter.util.CustomResponse.*;
-import static org.hamcrest.Matchers.*;
-import static org.springframework.http.MediaType.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static com.example.caloriecounter.util.CustomResponse.ERROR;
+import static com.example.caloriecounter.util.CustomResponse.SUCCESS;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
 
 import org.hamcrest.core.IsNull;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -92,6 +97,11 @@ class FeedControllerTest {
 
 		contents = new MockMultipartFile("contents", "contents", "",
 			objectMapper.writeValueAsString(new FeedTestDto("닭가슴살먹었다")).getBytes());
+	}
+
+	@AfterEach
+	void afterSetup() {
+		feedService.deleteAll();
 	}
 
 	@Test
@@ -236,6 +246,7 @@ class FeedControllerTest {
 		void setup() throws JsonProcessingException {
 			contents = new MockMultipartFile("contents", "contents", "",
 				objectMapper.writeValueAsString(new FeedTestDto("닭가슴살먹었다")).getBytes());
+			feedService.deleteAll();
 		}
 
 		@Nested
@@ -292,8 +303,20 @@ class FeedControllerTest {
 		}
 
 		@Test
+		@DisplayName("피드가 하나도 없는경우 maxCursor는 0을반환한다")
+		void maxCursor() throws Exception {
+			mockMvc.perform(get("/feeds?cursorNo=-1&displayPerPage=3")
+					.header(AUTHORIZATION_HEADER, AUTHORIZATION_BEARER + responseIssuedToken.accessToken())
+					.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.info.length()", is(0)))
+				.andDo(print())
+				.andExpect(status().isOk());
+		}
+
+		@Test
 		@DisplayName("피드 수정 실패")
 		void feed_update_test3() throws Exception {
+
 			MockMultipartHttpServletRequestBuilder builder = multipart("/feeds/" + notWriteFeed.getId());
 			builder.with(request -> {
 				request.setMethod("PUT");

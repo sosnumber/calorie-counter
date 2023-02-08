@@ -24,5 +24,7 @@ public interface FeedMapper {
 
 	List<FeedListDto> getFeedList(@Param("paging") final Paging paging);
 
-	long maxCursor();
+	Long maxCursor();
+
+	void deleteAll();
 }

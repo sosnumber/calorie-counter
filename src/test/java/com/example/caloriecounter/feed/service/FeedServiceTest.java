@@ -1,7 +1,9 @@
 package com.example.caloriecounter.feed.service;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,10 +22,10 @@ import com.example.caloriecounter.exception.CustomException;
 import com.example.caloriecounter.feed.controller.dto.request.FeedDto;
 import com.example.caloriecounter.feed.controller.dto.request.FeedListDto;
 import com.example.caloriecounter.feed.controller.dto.request.GetFeedListDto;
-import com.example.caloriecounter.photo.controller.request.ImageUploadDto;
 import com.example.caloriecounter.feed.controller.dto.request.Paging;
 import com.example.caloriecounter.feed.domain.Feed;
 import com.example.caloriecounter.like.service.LikeService;
+import com.example.caloriecounter.photo.controller.request.ImageUploadDto;
 import com.example.caloriecounter.photo.service.PhotoService;
 import com.example.caloriecounter.user.controller.dto.request.LoginForm;
 import com.example.caloriecounter.user.controller.dto.request.SignUpForm;
@@ -148,9 +150,19 @@ class FeedServiceTest {
 			));
 	}
 
+	@Test
+	@DisplayName("maxCursor는 피드의 최대값을 반환한다 ")
+	void maxCursor_withFeed() {
+		assertEquals(feedService.maxCursor(), 3);
+	}
+
 	@Nested
 	@DisplayName("작성된 피드가 없는경우")
 	class FeedNotExistBlock {
+		@BeforeEach
+		void setup() {
+			feedService.deleteAll();
+		}
 
 		@Nested
 		@DisplayName("피드 작성케이스")
@@ -217,6 +229,12 @@ class FeedServiceTest {
 			CustomException customException = assertThrows(CustomException.class,
 				() -> feedService.delete(alreadySignUpForm.getId(), notWriteFeed.getId()));
 			assertThat(StatusEnum.FEED_NOT_FOUND).isEqualTo(customException.getStatusEnum());
+		}
+
+		@Test
+		@DisplayName("maxCursor는 0이된다")
+		void maxCursor_withoutFeed() {
+			assertEquals(feedService.maxCursor(), 0);
 		}
 	}
 

@@ -21,18 +21,18 @@
         SELECT EXISTS(select user_Id from USER_TABLE where user_Id = #{userId})
     </select>
 
-    <select id="maxCursor" resultType="long">
+    <select id="maxCursor" resultType="Long">
         select Max(FEED_ID)
         from FEED;
     </select>
 
     <select id="getFeedList" resultType="com.example.caloriecounter.feed.controller.dto.request.FeedListDto">
         select f.feed_id,
-        f.contents,
-        f.writeDate,
-        u.ID
+               f.contents,
+               f.writeDate,
+               u.ID
         from FEED as f
-        inner join user_table u on u.id = f.user_id
+                 inner join user_table u on u.id = f.user_id
 
         where f.feed_id &lt;= #{paging.cursorNo}
         order by f.feed_id desc
@@ -49,5 +49,9 @@
         delete
         from FEED
         where FEED_ID = #{feedId};
+    </delete>
+
+    <delete id="deleteAll">
+        truncate table FEED;
     </delete>
 </mapper>

@@ -14,10 +14,10 @@ import com.example.caloriecounter.feed.controller.dto.request.FeedListDto;
 import com.example.caloriecounter.feed.controller.dto.request.GetFeedListDto;
 import com.example.caloriecounter.feed.controller.dto.request.Paging;
 import com.example.caloriecounter.feed.controller.dto.request.UpdateFeedDto;
-import com.example.caloriecounter.photo.controller.request.UpdateImageInfo;
 import com.example.caloriecounter.feed.domain.Feed;
 import com.example.caloriecounter.feed.repository.FeedRepository;
 import com.example.caloriecounter.like.service.LikeService;
+import com.example.caloriecounter.photo.controller.request.UpdateImageInfo;
 import com.example.caloriecounter.photo.service.PhotoService;
 import com.example.caloriecounter.util.StatusEnum;
 
@@ -81,8 +81,13 @@ public class FeedService {
 		return this.feedRepository.getFeedList(paging);
 	}
 
-	public long maxCursor() {
-		return this.feedRepository.maxCursor();
+	public Long maxCursor() {
+		final Long maxCursor = this.feedRepository.maxCursor();
+
+		if (maxCursor == null) {
+			return 0L;
+		}
+		return maxCursor;
 	}
 
 	public List<GetFeedListDto> feedListWithPhoto(final List<FeedListDto> feedList, final long userId,
@@ -104,5 +109,9 @@ public class FeedService {
 
 	private boolean isExist(List<MultipartFile> feedDto) {
 		return feedDto != null && feedDto.stream().noneMatch(MultipartFile::isEmpty);
+	}
+
+	public void deleteAll() {
+		this.feedRepository.deleteAll();
 	}
 }
