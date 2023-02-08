@@ -17,13 +17,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.caloriecounter.comment.service.CommentService;
 import com.example.caloriecounter.comment.controller.request.CommentRequestDto;
+import com.example.caloriecounter.comment.service.CommentService;
 import com.example.caloriecounter.feed.controller.dto.request.FeedDto;
 import com.example.caloriecounter.feed.service.FeedService;
 import com.example.caloriecounter.user.controller.dto.request.LoginForm;
-import com.example.caloriecounter.user.controller.dto.request.ResponseIssuedToken;
 import com.example.caloriecounter.user.controller.dto.request.SignUpForm;
+import com.example.caloriecounter.user.controller.dto.response.ResponseIssuedToken;
 import com.example.caloriecounter.user.service.UserService;
 import com.example.caloriecounter.util.StatusEnum;
 import com.fasterxml.jackson.databind.ObjectMapper;

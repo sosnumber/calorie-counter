@@ -8,8 +8,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.caloriecounter.user.controller.dto.request.LoginForm;
-import com.example.caloriecounter.user.controller.dto.request.ResponseIssuedToken;
 import com.example.caloriecounter.user.controller.dto.request.SignUpForm;
+import com.example.caloriecounter.user.controller.dto.response.ResponseIssuedToken;
+import com.example.caloriecounter.user.controller.dto.response.ResponseSignUpForm;
 import com.example.caloriecounter.user.service.UserService;
 import com.example.caloriecounter.util.CustomResponse;
 
@@ -22,10 +23,11 @@ public class UserController {
 	private final UserService userService;
 
 	@PostMapping("/users")
-	public ResponseEntity<CustomResponse<SignUpForm>> signUpSubmit(
+	public ResponseEntity<CustomResponse<ResponseSignUpForm>> signUpSubmit(
 		@RequestBody @Valid final SignUpForm signUpForm) {
 		this.userService.signUp(signUpForm);
-		return CustomResponse.created(signUpForm);
+		return CustomResponse.created(new ResponseSignUpForm(signUpForm.getId(), signUpForm.getUserName(),
+			signUpForm.getEmail()));
 	}
 
 	@PostMapping("/login")

@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.example.caloriecounter.exception.CustomException;
-import com.example.caloriecounter.user.controller.dto.request.ResponseIssuedToken;
+import com.example.caloriecounter.user.controller.dto.response.ResponseIssuedToken;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;

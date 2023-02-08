@@ -6,10 +6,8 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import lombok.Getter;
-import lombok.ToString;
 
 @Getter
-@ToString
 public class SignUpForm {
 	//mybatis 에서 주입받기위한 용도
 	private final long id;

@@ -29,9 +29,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Transactional
 class UserControllerTest {
 
-	private final String LOGIN_URL = "/login";
-	private final String USERS_URL = "/users";
-
 	@Autowired
 	private MockMvc mockMvc;
 
@@ -65,12 +62,11 @@ class UserControllerTest {
 	@Test
 	@DisplayName("회원가입 성공")
 	void signUp_success() throws Exception {
-		mockMvc.perform(post(USERS_URL)
+		mockMvc.perform(post("/users")
 				.contentType(APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(rightSignUpForm)))
 			.andExpect(status().isCreated())
 			.andExpect(jsonPath("result").value(SUCCESS))
-			.andExpect(jsonPath("$.info.userId").value(rightSignUpForm.getUserId()))
 			.andExpect(jsonPath("$.info.userName").value(rightSignUpForm.getUserName()))
 			.andExpect(jsonPath("$.info.email").value(rightSignUpForm.getEmail()))
 			.andDo(print());
@@ -79,7 +75,7 @@ class UserControllerTest {
 	@Test
 	@DisplayName("회원가입 실패 : 입력하지 않은 필드값 존재")
 	void signUp_wrong_input_fail() throws Exception {
-		mockMvc.perform(post(USERS_URL)
+		mockMvc.perform(post("/users")
 				.contentType(APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(wrongInputForm)))
 			.andExpect(status().isBadRequest())
@@ -91,7 +87,7 @@ class UserControllerTest {
 	@Test
 	@DisplayName("회원가입 실패 : 중복 회원가입 시도시 예외를 던진다.")
 	void signUp_AlreadyExistUserIdException_fail() throws Exception {
-		mockMvc.perform(post(USERS_URL)
+		mockMvc.perform(post("/users")
 				.contentType(APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(alreadySignUpForm)))
 			.andDo(print())
@@ -99,7 +95,6 @@ class UserControllerTest {
 			.andExpect(jsonPath("errorMessage").value(StatusEnum.DUPLICATED_ID.getMessage()))
 			.andExpect(status().isConflict());
 	}
-	// }
 
 	@Nested
 	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -131,7 +126,7 @@ class UserControllerTest {
 		@Test
 		@DisplayName("로그인 성공")
 		void login_success_test() throws Exception {
-			mockMvc.perform(post(LOGIN_URL)
+			mockMvc.perform(post("/login")
 					.contentType(APPLICATION_JSON)
 					.content(objectMapper.writeValueAsString(this.rightLoginForm)))
 				.andExpect(status().isOk())
@@ -143,7 +138,7 @@ class UserControllerTest {
 		@Test
 		@DisplayName("로그인 실패: 입력하지 않은 필드값 존재")
 		void login_fail_test() throws Exception {
-			mockMvc.perform(post(LOGIN_URL)
+			mockMvc.perform(post("/login")
 					.contentType(APPLICATION_JSON)
 					.content(objectMapper.writeValueAsString(this.wrongLoginForm)))
 				.andExpect(status().isBadRequest())
@@ -155,7 +150,7 @@ class UserControllerTest {
 		@Test
 		@DisplayName("로그인 실패: 존재하지 않는 ID")
 		void login_fail_test2() throws Exception {
-			mockMvc.perform(post(LOGIN_URL)
+			mockMvc.perform(post("/login")
 					.contentType(APPLICATION_JSON)
 					.content(objectMapper.writeValueAsString(this.notExistIdLoginForm)))
 				.andExpect(status().isNotFound())
@@ -167,7 +162,7 @@ class UserControllerTest {
 		@Test
 		@DisplayName("로그인 실패: 비밀번호 일치하지 않음")
 		void login_fail_test3() throws Exception {
-			mockMvc.perform(post(LOGIN_URL)
+			mockMvc.perform(post("/login")
 					.contentType(APPLICATION_JSON)
 					.content(objectMapper.writeValueAsString(this.wrongPasswordLoginForm)))
 				.andExpect(status().isBadRequest())

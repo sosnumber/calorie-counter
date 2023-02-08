@@ -15,8 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.caloriecounter.exception.CustomException;
 import com.example.caloriecounter.user.controller.dto.request.LoginForm;
-import com.example.caloriecounter.user.controller.dto.request.ResponseIssuedToken;
 import com.example.caloriecounter.user.controller.dto.request.SignUpForm;
+import com.example.caloriecounter.user.controller.dto.response.ResponseIssuedToken;
 import com.example.caloriecounter.user.domain.User;
 import com.example.caloriecounter.util.StatusEnum;
 
