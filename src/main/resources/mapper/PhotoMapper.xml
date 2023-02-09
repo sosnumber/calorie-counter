@@ -30,7 +30,7 @@
     <update id="updateImage">
         UPDATE PHOTO
         set PHOTO_NAME = #{updateImageInfo.updateImageName},
-        PHOTO_PATH = #{updateImageInfo.updateImagePath}
+            PHOTO_PATH = #{updateImageInfo.updateImagePath}
         where FEED_ID = #{feedId};
     </update>
 
@@ -39,5 +39,9 @@
         delete
         from photo
         where FEED_ID = #{feedId};
+    </delete>
+
+    <delete id="deleteAll">
+        truncate table PHOTO;
     </delete>
 </mapper>

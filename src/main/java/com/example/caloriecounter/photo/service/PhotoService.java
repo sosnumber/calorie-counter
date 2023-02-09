@@ -52,4 +52,8 @@ public class PhotoService {
 	public List<Photo> findImageByFeedId(final long feedId) {
 		return this.photoRepository.findImageByFeedId(feedId);
 	}
+
+	public void deleteAll() {
+		this.photoRepository.deleteAll();
+	}
 }

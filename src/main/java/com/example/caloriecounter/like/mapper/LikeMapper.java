@@ -20,4 +20,6 @@ public interface LikeMapper {
 
 	void changeStatus(@Param("userId") final long userId, @Param("feedId") final long feedId,
 		@Param("likeStatus") final LikeStatus likeStatus);
+
+	void deleteAll();
 }

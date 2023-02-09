@@ -46,4 +46,8 @@ public class LikeService {
 
 		return this.likeRepository.likeCount(feed.id(), LikeStatus.ACTIVATE);
 	}
+
+	public void deleteAll() {
+		this.likeRepository.deleteAll();
+	}
 }

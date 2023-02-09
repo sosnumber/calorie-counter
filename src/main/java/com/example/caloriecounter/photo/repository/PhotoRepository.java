@@ -32,4 +32,8 @@ public class PhotoRepository {
 	public List<Photo> findImageByFeedId(final long feedId) {
 		return this.photoMapper.findImageByFeedId(feedId);
 	}
+
+	public void deleteAll() {
+		this.photoMapper.deleteAll();
+	}
 }

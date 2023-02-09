@@ -34,4 +34,7 @@ public class LikeRepository {
 		this.likeMapper.changeStatus(userId, feedId, likeStatus);
 	}
 
+	public void deleteAll() {
+		this.likeMapper.deleteAll();
+	}
 }

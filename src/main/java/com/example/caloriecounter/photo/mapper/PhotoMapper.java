@@ -23,4 +23,6 @@ public interface PhotoMapper {
 	void delete(final long feedId);
 
 	List<Photo> findImageByFeedId(final long feedId);
+
+	void deleteAll();
 }
