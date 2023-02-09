@@ -6,9 +6,9 @@ import java.util.Optional;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import com.example.caloriecounter.comment.domain.Comment;
 import com.example.caloriecounter.comment.controller.request.CommentRequestDto;
 import com.example.caloriecounter.comment.controller.request.ReplyDto;
+import com.example.caloriecounter.comment.domain.Comment;
 
 @Mapper
 public interface CommentMapper {
@@ -18,7 +18,7 @@ public interface CommentMapper {
 
 	void insertReply(@Param("replyDto") final ReplyDto replyDto);
 
-	Optional<Comment> findCommentById(@Param("parentId") final Long parentId);
+	Optional<Comment> findById(@Param("commentId") final Long commentId);
 
 	List<Comment> comment(@Param("feedId") final long feedId, @Param("offset") final int offset,
 		@Param("commentPerPage") final int commentPerPage);
@@ -33,4 +33,6 @@ public interface CommentMapper {
 	void updateChild(final Long parentId);
 
 	void delete(final long feedId);
+
+	void deleteAll();
 }

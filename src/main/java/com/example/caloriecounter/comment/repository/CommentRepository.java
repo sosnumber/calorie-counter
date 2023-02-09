@@ -5,10 +5,10 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
-import com.example.caloriecounter.comment.domain.Comment;
-import com.example.caloriecounter.comment.mapper.CommentMapper;
 import com.example.caloriecounter.comment.controller.request.CommentRequestDto;
 import com.example.caloriecounter.comment.controller.request.ReplyDto;
+import com.example.caloriecounter.comment.domain.Comment;
+import com.example.caloriecounter.comment.mapper.CommentMapper;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,8 +27,8 @@ public class CommentRepository {
 		this.commentMapper.insertReply(replyDto);
 	}
 
-	public Optional<Comment> findCommentById(final Long parentId) {
-		return this.commentMapper.findCommentById(parentId);
+	public Optional<Comment> findById(final Long commentId) {
+		return this.commentMapper.findById(commentId);
 	}
 
 	public List<Comment> comment(final long feedId, final int offset, final int commentPerPage) {
@@ -49,5 +49,9 @@ public class CommentRepository {
 
 	public void updateChild(final Long parentId) {
 		this.commentMapper.updateChild(parentId);
+	}
+
+	public void deleteAll() {
+		this.commentMapper.deleteAll();
 	}
 }

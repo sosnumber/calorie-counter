@@ -15,23 +15,13 @@ public record Comment(
 	int childNumber
 
 ) {
-	public Comment(long id, long feedId, LocalDateTime writeDate, String contents, Long parentId, int depth,
+	public Comment(long id, long feedId, String contents, Long parentId, int depth,
 		long userId, int groupNumber, int groupRefOrder, int childNumber) {
-		this.id = id;
-		this.feedId = feedId;
-		this.writeDate = writeDate;
-		this.contents = contents;
-		this.parentId = parentId;
-		this.depth = depth;
-		this.userId = userId;
-		this.groupNumber = groupNumber;
-		this.groupRefOrder = groupRefOrder;
-		this.childNumber = childNumber;
+		this(id, feedId, null, contents, parentId, depth, userId, groupNumber, groupRefOrder,
+			childNumber);
 	}
 
-	public Comment(long id, long feedId, LocalDateTime writeDate, String contents, Long parentId, int depth,
-		long userId,
-		int groupNumber) {
-		this(id, feedId, writeDate, contents, parentId, depth, userId, groupNumber, 1, 0);
+	public Comment(long id, long feedId, String contents, Long parentId, int depth, long userId, int groupNumber) {
+		this(id, feedId, null, contents, parentId, depth, userId, groupNumber, 1, 0);
 	}
 }

@@ -5,11 +5,11 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.caloriecounter.comment.controller.request.CommentRequestDto;
+import com.example.caloriecounter.comment.controller.request.ReplyDto;
 import com.example.caloriecounter.comment.domain.Comment;
 import com.example.caloriecounter.comment.repository.CommentRepository;
 import com.example.caloriecounter.exception.CustomException;
-import com.example.caloriecounter.comment.controller.request.CommentRequestDto;
-import com.example.caloriecounter.comment.controller.request.ReplyDto;
 import com.example.caloriecounter.feed.domain.Feed;
 import com.example.caloriecounter.feed.repository.FeedRepository;
 import com.example.caloriecounter.util.StatusEnum;
@@ -38,11 +38,11 @@ public class CommentService {
 	}
 
 	@Transactional
-	public void reply(final long feedId, final long userId, final CommentRequestDto commentRequestDto) {
+	public void insertReply(final long feedId, final long userId, final CommentRequestDto commentRequestDto) {
 		final Feed feed = this.feedRepository.findByFeedId(feedId)
 			.orElseThrow(() -> new CustomException(StatusEnum.FEED_NOT_FOUND, String.format("%s not exist", feedId)));
 
-		final Comment parentComment = this.commentRepository.findCommentById(commentRequestDto.getParentId())
+		final Comment parentComment = this.commentRepository.findById(commentRequestDto.getParentId())
 			.orElseThrow(
 				() -> new CustomException(StatusEnum.COMMENT_NOT_FOUND,
 					String.format("%s not exist", commentRequestDto.getParentId())));
@@ -72,5 +72,9 @@ public class CommentService {
 		}
 
 		throw new RuntimeException("답글 작성 오류");
+	}
+
+	public void deleteAll() {
+		this.commentRepository.deleteAll();
 	}
 }

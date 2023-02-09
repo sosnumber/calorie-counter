@@ -106,13 +106,11 @@ public class FeedController {
 		if (commentRequestDto.getParentId() == null) {
 			this.commentService.insertComment(feedId, userAuthentication.id(), commentRequestDto);
 			return CustomResponse.created(
-				new CommentResponseDto(commentRequestDto.getCommentId(), commentRequestDto.getContents(),
-					commentRequestDto.getGroupNumber()));
+				new CommentResponseDto(commentRequestDto.getCommentId(), commentRequestDto.getContents()));
 		}
-		this.commentService.reply(feedId, userAuthentication.id(), commentRequestDto);
+		this.commentService.insertReply(feedId, userAuthentication.id(), commentRequestDto);
 		return CustomResponse.created(
-			new CommentResponseDto(commentRequestDto.getCommentId(), commentRequestDto.getContents(),
-				commentRequestDto.getGroupNumber()));
+			new CommentResponseDto(commentRequestDto.getCommentId(), commentRequestDto.getContents()));
 	}
 
 	//todo 수정, 삭제
