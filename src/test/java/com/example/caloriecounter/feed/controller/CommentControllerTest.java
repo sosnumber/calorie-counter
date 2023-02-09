@@ -1,12 +1,16 @@
 package com.example.caloriecounter.feed.controller;
 
-import static com.example.caloriecounter.feed.controller.FeedControllerTest.*;
-import static com.example.caloriecounter.util.CustomResponse.*;
-import static org.springframework.http.MediaType.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static com.example.caloriecounter.feed.controller.FeedControllerTest.AUTHORIZATION_BEARER;
+import static com.example.caloriecounter.feed.controller.FeedControllerTest.AUTHORIZATION_HEADER;
+import static com.example.caloriecounter.util.CustomResponse.ERROR;
+import static com.example.caloriecounter.util.CustomResponse.SUCCESS;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -64,7 +68,6 @@ class CommentControllerTest {
 
 	@BeforeEach
 	void setup() {
-		System.out.println(alreadyLoginForm);
 		this.responseIssuedToken = this.userService.login(alreadyLoginForm);
 	}
 
@@ -77,16 +80,23 @@ class CommentControllerTest {
 			feedService.write(feedWithContents);
 		}
 
+		@AfterEach
+		void after() {
+			feedService.deleteAll();
+			commentService.deleteAll();
+		}
+
 		@Test
 		@DisplayName("댓글 작성 성공")
-		void feed_comment_success() throws Exception {
+		void comment_write_success() throws Exception {
 			mockMvc.perform(post("/feeds/" + feedWithContents.getId() + "/comment")
 					.header(AUTHORIZATION_HEADER, AUTHORIZATION_BEARER + responseIssuedToken.accessToken())
 					.content(objectMapper.writeValueAsString(comment))
 					.contentType(APPLICATION_JSON))
 				.andExpect(jsonPath("result").value(SUCCESS))
-				.andExpect(jsonPath("info.commentId").exists())
+				.andExpect(jsonPath("info.commentId").value(1))
 				.andExpect(jsonPath("info.contents").value(comment.getContents()))
+				.andExpect(jsonPath("info.groupNumber").value(comment.getGroupNumber()))
 				.andDo(print())
 				.andExpect(status().isCreated());
 		}
