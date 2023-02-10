@@ -15,6 +15,8 @@ calorie-counter 서비스는 기본적으로 사용자가 섭취한 음식을 �
 ## ERD
 https://www.erdcloud.com/d/thuYe7sMXNEzk7MPp
 
+## 프로젝트 구조도
+
 ## 메뉴 구조도
 todo(wiki)
 
