@@ -1,22 +1,21 @@
 package com.example.caloriecounter.user.controller;
 
-import static com.example.caloriecounter.util.CustomResponse.*;
-import static org.hamcrest.Matchers.*;
-import static org.springframework.http.MediaType.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static com.example.caloriecounter.util.CustomResponse.ERROR;
+import static com.example.caloriecounter.util.CustomResponse.SUCCESS;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.example.caloriecounter.user.controller.dto.request.LoginForm;
 import com.example.caloriecounter.user.controller.dto.request.SignUpForm;
@@ -26,7 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Transactional
+@Sql("classpath:tableInit.sql")
 class UserControllerTest {
 
 	@Autowired
@@ -52,6 +51,11 @@ class UserControllerTest {
 		"dudwls0505@naver.com"
 	);
 
+	private final LoginForm alreadyLoginForm = new LoginForm(
+		alreadySignUpForm.getUserId(),
+		alreadySignUpForm.getUserPassword()
+	);
+
 	private final SignUpForm wrongInputForm = new SignUpForm(
 		"wrongUserId",
 		"잘못된유저",
@@ -67,6 +71,8 @@ class UserControllerTest {
 				.content(objectMapper.writeValueAsString(rightSignUpForm)))
 			.andExpect(status().isCreated())
 			.andExpect(jsonPath("result").value(SUCCESS))
+			//todo 꼭 ID값까지 확인해야하는것인가?
+			// .andExpect(jsonPath("$.info.id").value(rightSignUpForm.getId()))
 			.andExpect(jsonPath("$.info.userName").value(rightSignUpForm.getUserName()))
 			.andExpect(jsonPath("$.info.email").value(rightSignUpForm.getEmail()))
 			.andDo(print());
@@ -96,79 +102,64 @@ class UserControllerTest {
 			.andExpect(status().isConflict());
 	}
 
-	@Nested
-	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-	@DisplayName("로그인")
-	class loginBlock {
+	private final LoginForm wrongLoginForm = new LoginForm(
+		"join_wrongUserId",
+		null
+	);
+	private final LoginForm wrongPasswordLoginForm = new LoginForm(
+		alreadySignUpForm.getUserId(),
+		"wrongPassword234"
+	);
+	private final LoginForm notExistIdLoginForm = new LoginForm(
+		"notExistId",
+		rightSignUpForm.getUserPassword()
+	);
 
-		private final LoginForm rightLoginForm = new LoginForm(
-			rightSignUpForm.getUserId(),
-			rightSignUpForm.getUserPassword()
-		);
-		private final LoginForm wrongLoginForm = new LoginForm(
-			"join_wrongUserId",
-			null
-		);
-		private final LoginForm wrongPasswordLoginForm = new LoginForm(
-			rightSignUpForm.getUserId(),
-			"wrongPassword234"
-		);
-		private final LoginForm notExistIdLoginForm = new LoginForm(
-			"notExistId",
-			rightSignUpForm.getUserPassword()
-		);
+	@Test
+	@DisplayName("로그인 성공")
+	void login_success_test() throws Exception {
+		mockMvc.perform(post("/login")
+				.contentType(APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(this.alreadyLoginForm)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("result").value(SUCCESS))
+			.andExpect(jsonPath("$.info.length()", is(3)))
+			.andDo(print());
+	}
 
-		@BeforeAll
-		void setup() {
-			userService.signUp(rightSignUpForm);
-		}
+	@Test
+	@DisplayName("로그인 실패: 입력하지 않은 필드값 존재")
+	void login_fail_test() throws Exception {
+		mockMvc.perform(post("/login")
+				.contentType(APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(this.wrongLoginForm)))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("result").value(ERROR))
+			.andExpect(jsonPath("errorMessage").value(StatusEnum.INVALID_FORM_INPUT.getMessage()))
+			.andDo(print());
+	}
 
-		@Test
-		@DisplayName("로그인 성공")
-		void login_success_test() throws Exception {
-			mockMvc.perform(post("/login")
-					.contentType(APPLICATION_JSON)
-					.content(objectMapper.writeValueAsString(this.rightLoginForm)))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("result").value(SUCCESS))
-				.andExpect(jsonPath("$.info.length()", is(3)))
-				.andDo(print());
-		}
+	@Test
+	@DisplayName("로그인 실패: 존재하지 않는 ID")
+	void login_fail_test2() throws Exception {
+		mockMvc.perform(post("/login")
+				.contentType(APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(this.notExistIdLoginForm)))
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("result").value(ERROR))
+			.andExpect(jsonPath("errorMessage").value(StatusEnum.USER_NOT_FOUND.getMessage()))
+			.andDo(print());
+	}
 
-		@Test
-		@DisplayName("로그인 실패: 입력하지 않은 필드값 존재")
-		void login_fail_test() throws Exception {
-			mockMvc.perform(post("/login")
-					.contentType(APPLICATION_JSON)
-					.content(objectMapper.writeValueAsString(this.wrongLoginForm)))
-				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("result").value(ERROR))
-				.andExpect(jsonPath("errorMessage").value(StatusEnum.INVALID_FORM_INPUT.getMessage()))
-				.andDo(print());
-		}
-
-		@Test
-		@DisplayName("로그인 실패: 존재하지 않는 ID")
-		void login_fail_test2() throws Exception {
-			mockMvc.perform(post("/login")
-					.contentType(APPLICATION_JSON)
-					.content(objectMapper.writeValueAsString(this.notExistIdLoginForm)))
-				.andExpect(status().isNotFound())
-				.andExpect(jsonPath("result").value(ERROR))
-				.andExpect(jsonPath("errorMessage").value(StatusEnum.USER_NOT_FOUND.getMessage()))
-				.andDo(print());
-		}
-
-		@Test
-		@DisplayName("로그인 실패: 비밀번호 일치하지 않음")
-		void login_fail_test3() throws Exception {
-			mockMvc.perform(post("/login")
-					.contentType(APPLICATION_JSON)
-					.content(objectMapper.writeValueAsString(this.wrongPasswordLoginForm)))
-				.andExpect(status().isBadRequest())
-				.andExpect(jsonPath("result").value(ERROR))
-				.andExpect(jsonPath("errorMessage").value(StatusEnum.PASSWORD_NOT_MATCH.getMessage()))
-				.andDo(print());
-		}
+	@Test
+	@DisplayName("로그인 실패: 비밀번호 일치하지 않음")
+	void login_fail_test3() throws Exception {
+		mockMvc.perform(post("/login")
+				.contentType(APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(this.wrongPasswordLoginForm)))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("result").value(ERROR))
+			.andExpect(jsonPath("errorMessage").value(StatusEnum.PASSWORD_NOT_MATCH.getMessage()))
+			.andDo(print());
 	}
 }

@@ -8,27 +8,26 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Optional;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.jdbc.Sql;
 
 import com.example.caloriecounter.comment.controller.request.CommentRequestDto;
 import com.example.caloriecounter.comment.domain.Comment;
 import com.example.caloriecounter.comment.repository.CommentRepository;
 import com.example.caloriecounter.exception.CustomException;
-import com.example.caloriecounter.feed.controller.dto.request.FeedDto;
 import com.example.caloriecounter.feed.service.FeedService;
 import com.example.caloriecounter.user.controller.dto.request.LoginForm;
 import com.example.caloriecounter.user.controller.dto.request.SignUpForm;
-import com.example.caloriecounter.user.controller.dto.response.ResponseIssuedToken;
 import com.example.caloriecounter.user.service.UserService;
 import com.example.caloriecounter.util.StatusEnum;
 
 @SpringBootTest
+@Sql("classpath:tableInit.sql")
 class CommentServiceTest {
 
 	@Autowired
@@ -43,24 +42,16 @@ class CommentServiceTest {
 	@Autowired
 	private CommentRepository commentRepository;
 
-	private ResponseIssuedToken responseIssuedToken;
-
 	private final SignUpForm alreadySignUpForm = new SignUpForm("mockUser", "이영진", "asdf1234", "dudwls0505@naver.com");
 	private final LoginForm alreadyLoginForm = new LoginForm("mockUser", "asdf1234");
-	FeedDto feedWithContents = new FeedDto("게시글내용1", alreadySignUpForm.getId());
 
 	CommentRequestDto commentRequestDto = new CommentRequestDto("댓글1");
 	CommentRequestDto replyDto = new CommentRequestDto(2, "답글1", 1L, 1);
 
 	@BeforeEach
 	void setup() {
-		this.responseIssuedToken = this.userService.login(alreadyLoginForm);
-		feedService.write(feedWithContents);
-	}
-
-	@AfterEach
-	void after() {
-		commentService.deleteAll();
+		this.userService.login(alreadyLoginForm);
+		this.commentService.deleteAll();
 	}
 
 	@Test

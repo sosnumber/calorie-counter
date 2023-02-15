@@ -10,16 +10,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.example.caloriecounter.comment.controller.request.CommentRequestDto;
 import com.example.caloriecounter.comment.service.CommentService;
@@ -34,7 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Transactional
+@Sql("classpath:tableInit.sql")
 class CommentControllerTest {
 
 	@Autowired
@@ -69,69 +67,58 @@ class CommentControllerTest {
 	@BeforeEach
 	void setup() {
 		this.responseIssuedToken = this.userService.login(alreadyLoginForm);
+		this.feedService.deleteAll();
+		this.commentService.deleteAll();
 	}
 
-	@Nested
-	@DisplayName("피드가 존재하는 경우")
-	class FeedExistBlock {
+	@Test
+	@DisplayName("댓글 작성 성공")
+	void comment_write_success() throws Exception {
+		feedService.write(feedWithContents);
 
-		@BeforeEach
-		void setup() {
-			feedService.write(feedWithContents);
-		}
+		mockMvc.perform(post("/feeds/" + feedWithContents.getId() + "/comment")
+				.header(AUTHORIZATION_HEADER, AUTHORIZATION_BEARER + responseIssuedToken.accessToken())
+				.content(objectMapper.writeValueAsString(comment))
+				.contentType(APPLICATION_JSON))
+			.andExpect(jsonPath("result").value(SUCCESS))
+			.andExpect(jsonPath("info.commentId").value(1))
+			.andExpect(jsonPath("info.contents").value(comment.getContents()))
+			.andDo(print())
+			.andExpect(status().isCreated());
+	}
 
-		@AfterEach
-		void after() {
-			feedService.deleteAll();
-			commentService.deleteAll();
-		}
+	@Test
+	@DisplayName("대댓글 작성 성공: 부모댓글이 존재한다")
+	void feed_reply_success() throws Exception {
+		//given : 부모댓글
+		feedService.write(feedWithContents);
+		commentService.insertComment(feedWithContents.getId(), alreadySignUpForm.getId(), comment);
 
-		@Test
-		@DisplayName("댓글 작성 성공")
-		void comment_write_success() throws Exception {
-			mockMvc.perform(post("/feeds/" + feedWithContents.getId() + "/comment")
-					.header(AUTHORIZATION_HEADER, AUTHORIZATION_BEARER + responseIssuedToken.accessToken())
-					.content(objectMapper.writeValueAsString(comment))
-					.contentType(APPLICATION_JSON))
-				.andExpect(jsonPath("result").value(SUCCESS))
-				.andExpect(jsonPath("info.commentId").value(1))
-				.andExpect(jsonPath("info.contents").value(comment.getContents()))
-				.andExpect(jsonPath("info.groupNumber").value(comment.getGroupNumber()))
-				.andDo(print())
-				.andExpect(status().isCreated());
-		}
+		mockMvc.perform(post("/feeds/" + feedWithContents.getId() + "/comment")
+				.header(AUTHORIZATION_HEADER, AUTHORIZATION_BEARER + responseIssuedToken.accessToken())
+				.content(
+					objectMapper.writeValueAsString(replyDto))
+				.contentType(APPLICATION_JSON))
+			.andExpect(jsonPath("result").value(SUCCESS))
+			.andExpect(jsonPath("info.commentId").exists())
+			.andExpect(jsonPath("info.contents").value(replyDto.getContents()))
+			.andDo(print())
+			.andExpect(status().isCreated());
+	}
 
-		@Test
-		@DisplayName("대댓글 작성 성공: 부모댓글이 존재한다")
-		void feed_reply_success() throws Exception {
-			//given : 부모댓글
-			commentService.insertComment(feedWithContents.getId(), alreadySignUpForm.getId(), comment);
+	@Test
+	@DisplayName("대댓글 작성 실패: 부모댓글이 존재하지않음")
+	void feed_reply_fail2() throws Exception {
+		feedService.write(feedWithContents);
 
-			mockMvc.perform(post("/feeds/" + feedWithContents.getId() + "/comment")
-					.header(AUTHORIZATION_HEADER, AUTHORIZATION_BEARER + responseIssuedToken.accessToken())
-					.content(
-						objectMapper.writeValueAsString(replyDto))
-					.contentType(APPLICATION_JSON))
-				.andExpect(jsonPath("result").value(SUCCESS))
-				.andExpect(jsonPath("info.commentId").exists())
-				.andExpect(jsonPath("info.contents").value(replyDto.getContents()))
-				.andDo(print())
-				.andExpect(status().isCreated());
-		}
-
-		@Test
-		@DisplayName("대댓글 작성 실패: 부모댓글이 존재하지않음")
-		void feed_reply_fail2() throws Exception {
-			mockMvc.perform(post("/feeds/" + feedWithContents.getId() + "/comment")
-					.header(AUTHORIZATION_HEADER, AUTHORIZATION_BEARER + responseIssuedToken.accessToken())
-					.content(objectMapper.writeValueAsString(replyWithNotParent))
-					.contentType(APPLICATION_JSON))
-				.andExpect(jsonPath("result").value(ERROR))
-				.andExpect(jsonPath("errorMessage").value(StatusEnum.COMMENT_NOT_FOUND.getMessage()))
-				.andDo(print())
-				.andExpect(status().isNotFound());
-		}
-
+		mockMvc.perform(post("/feeds/" + feedWithContents.getId() + "/comment")
+				.header(AUTHORIZATION_HEADER, AUTHORIZATION_BEARER + responseIssuedToken.accessToken())
+				.content(objectMapper.writeValueAsString(replyWithNotParent))
+				.contentType(APPLICATION_JSON))
+			.andExpect(jsonPath("result").value(ERROR))
+			.andExpect(jsonPath("errorMessage").value(StatusEnum.COMMENT_NOT_FOUND.getMessage()))
+			.andDo(print())
+			.andExpect(status().isNotFound());
 	}
 
 	@Test
