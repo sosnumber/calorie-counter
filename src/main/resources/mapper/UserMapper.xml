@@ -38,4 +38,8 @@
         from USER_TABLE
         where USER_ID = #{userId}
     </select>
+
+    <delete id="deleteAll">
+        truncate table USER_TABLE;
+    </delete>
 </mapper>

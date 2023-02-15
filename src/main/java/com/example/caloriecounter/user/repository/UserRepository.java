@@ -33,4 +33,8 @@ public class UserRepository {
 	public String getPassword(final String userId) {
 		return this.userMapper.getPassword(userId);
 	}
+
+	public void deleteAll() {
+		this.userMapper.deleteAll();
+	}
 }

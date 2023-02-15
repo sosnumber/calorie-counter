@@ -26,8 +26,8 @@ public class LikeRepository {
 		return this.likeMapper.findByFeedAndUser(userId, feedId);
 	}
 
-	public LikeStatus findLikeStatusByUserId(final long feedId, final long mockUserId) {
-		return this.likeMapper.findLikeStatusByUserId(feedId, mockUserId);
+	public LikeStatus findLikeStatusByUserId(final long feedId, final long userId) {
+		return this.likeMapper.findLikeStatusByUserId(feedId, userId);
 	}
 
 	public void changeStatus(final long userId, final long feedId, final LikeStatus likeStatus) {

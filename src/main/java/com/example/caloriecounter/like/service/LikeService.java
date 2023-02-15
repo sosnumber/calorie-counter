@@ -36,8 +36,8 @@ public class LikeService {
 		}
 	}
 
-	public LikeStatus findLikeStatusByUserId(final long feedId, final long mockUserId) {
-		return this.likeRepository.findLikeStatusByUserId(feedId, mockUserId);
+	public LikeStatus findLikeStatusByUserId(final long feedId, final long userId) {
+		return this.likeRepository.findLikeStatusByUserId(feedId, userId);
 	}
 
 	public int likeCount(final long feedId) {

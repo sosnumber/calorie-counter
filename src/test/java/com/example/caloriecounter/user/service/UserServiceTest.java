@@ -1,5 +1,7 @@
 package com.example.caloriecounter.user.service;
 
+import static com.example.caloriecounter.user.source.TestUserSource.alreadyLoginForm;
+import static com.example.caloriecounter.user.source.TestUserSource.alreadySignUpForm;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -30,18 +32,6 @@ class UserServiceTest {
 
 	@Autowired
 	private UserCacheService userCacheService;
-
-	private final SignUpForm alreadySignUpForm = new SignUpForm(
-		"mockUser",
-		"이영진",
-		"asdf1234",
-		"dudwls0505@naver.com"
-	);
-
-	private final LoginForm alreadyLoginForm = new LoginForm(
-		alreadySignUpForm.getUserId(),
-		alreadySignUpForm.getUserPassword()
-	);
 
 	private final LoginForm wrongLoginForm = new LoginForm(
 		"notExistTestId",

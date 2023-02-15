@@ -1,5 +1,6 @@
 package com.example.caloriecounter.feed.service;
 
+import static com.example.caloriecounter.user.source.TestUserSource.alreadyLoginForm;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -51,27 +52,19 @@ class FeedServiceTest {
 	@Autowired
 	private LikeService likeService;
 
-	private final SignUpForm wrongSignUpForm = new SignUpForm(2, "wrongUser", "김영진", "asdf1234",
-		"dudwls0505@nate.com");
+	private final SignUpForm wrongSignUpForm = new SignUpForm(2, "wrongUser", "김영진", "asdf1234", "dudwls0505@nate.com");
 	private final LoginForm wrongLoginForm = new LoginForm(wrongSignUpForm.getUserId(),
 		wrongSignUpForm.getUserPassword());
 
-	private final SignUpForm wrongSignUpForm2 = new SignUpForm("otherUser2", "외부인2", "asdf1234", "dudwls0504@daum.net");
-	private final LoginForm wrongLoginForm2 = new LoginForm(wrongSignUpForm2.getUserId(),
-		wrongSignUpForm2.getUserPassword());
-
-	private final SignUpForm alreadySignUpForm = new SignUpForm("mockUser", "이영진", "asdf1234", "dudwls0505@naver.com");
-	private final LoginForm alreadyLoginForm = new LoginForm("mockUser", "asdf1234");
-
-	private final FeedDto feedByWrongUser = new FeedDto("게시글내용1", alreadySignUpForm.getId());
+	private final FeedDto feedByWrongUser = new FeedDto("게시글내용1", 1);
 
 	MockMultipartFile image1 = new MockMultipartFile("feedDto", "photos", "image/jpeg", "photos".getBytes());
 	MockMultipartFile image2 = new MockMultipartFile("feedDto", "photos2", "image/jpeg", "photos2".getBytes());
 
 	FeedDto notWriteFeed = new FeedDto("게시글내용1", List.of(this.image1, this.image2),
-		alreadySignUpForm.getId());
-	FeedDto feedWithContents = new FeedDto("게시글내용1", alreadySignUpForm.getId());
-	FeedDto feedWithPhoto = new FeedDto(List.of(this.image1, this.image2), alreadySignUpForm.getId());
+		1);
+	FeedDto feedWithContents = new FeedDto("게시글내용1", 1);
+	FeedDto feedWithPhoto = new FeedDto(List.of(this.image1, this.image2), 1);
 
 	//todo 피드를 작성하고, 삭제해야할텐데 @AfterEach로 삭제하나? 근데 만약, 테스트도중 빌드서버가 중단하거나 디버거에서 테스트를 종료하면..? @AfterEach를 생략하는경우가 생길텐데?
 	// todo 이 부분이 생략이 안된다고 해서 어떤 문제가 생길수있는것인가? 일단 놔둔다.
@@ -86,10 +79,10 @@ class FeedServiceTest {
 	void feed_update_success() {
 		feedService.write(feedWithContents);
 
-		assertDoesNotThrow(() -> feedService.update(feedWithContents.getContents(), null, alreadySignUpForm.getId(),
+		assertDoesNotThrow(() -> feedService.update(feedWithContents.getContents(), null, 1,
 			feedWithContents.getId()));
 		assertThat(feedService.findByFeedId(feedWithContents.getId()).orElseThrow()).isEqualTo(
-			new Feed(feedWithContents.getId(), feedWithContents.getContents(), null, alreadySignUpForm.getId(),
+			new Feed(feedWithContents.getId(), feedWithContents.getContents(), null, 1,
 				null,
 				null));
 	}
@@ -100,7 +93,7 @@ class FeedServiceTest {
 		feedService.write(feedWithContents);
 
 		assertDoesNotThrow(
-			() -> feedService.update(null, List.of(image1, image2), alreadySignUpForm.getId(),
+			() -> feedService.update(null, List.of(image1, image2), 1,
 				feedWithContents.getId()));
 		//todo 이미지 수정확인..?
 	}
@@ -111,7 +104,7 @@ class FeedServiceTest {
 		feedService.write(feedWithContents);
 
 		assertDoesNotThrow(
-			() -> feedService.update(UPDATE_CONTENT, List.of(image1, image2), alreadySignUpForm.getId(),
+			() -> feedService.update(UPDATE_CONTENT, List.of(image1, image2), 1,
 				feedWithContents.getId()));
 
 		//todo 이미지 수정확인..?
@@ -122,7 +115,7 @@ class FeedServiceTest {
 	void feed_delete_success() {
 		feedService.write(feedWithContents);
 
-		assertDoesNotThrow(() -> feedService.delete(alreadySignUpForm.getId(), feedWithContents.getId()));
+		assertDoesNotThrow(() -> feedService.delete(1, feedWithContents.getId()));
 		assertThat(feedService.findByFeedId(feedWithContents.getId())).isEqualTo(Optional.empty());
 		assertThat(photoService.findImageByFeedId(feedWithContents.getId()).size()).isEqualTo(0);
 	}
@@ -138,8 +131,8 @@ class FeedServiceTest {
 
 		//then
 		assertThat(feedList.size()).isEqualTo(3);
-		assertThat(feedService.feedListWithPhoto(feedList, alreadySignUpForm.getId(), 1, 30).size()).isEqualTo(3);
-		assertThat(feedService.feedListWithPhoto(feedList, alreadySignUpForm.getId(), 1, 30).get(0)).isEqualTo(
+		assertThat(feedService.feedListWithPhoto(feedList, 1, 1, 30).size()).isEqualTo(3);
+		assertThat(feedService.feedListWithPhoto(feedList, 1, 1, 30).get(0)).isEqualTo(
 			new GetFeedListDto(
 				feedList.get(0).feedId(),
 				feedList.get(0).contents(),
@@ -147,10 +140,10 @@ class FeedServiceTest {
 				feedList.get(0).userId(),
 				photoService.photos(feedList.get(0).feedId()),
 				likeService.likeCount(feedList.get(0).feedId()),
-				likeService.findLikeStatusByUserId(feedList.get(0).feedId(), alreadySignUpForm.getId()),
+				likeService.findLikeStatusByUserId(feedList.get(0).feedId(), 1),
 				commentService.comment(feedList.get(0).feedId(), 0, 30)));
 
-		assertThat(feedService.feedListWithPhoto(feedList, alreadySignUpForm.getId(), 1, 30).get(2)).isEqualTo(
+		assertThat(feedService.feedListWithPhoto(feedList, 1, 1, 30).get(2)).isEqualTo(
 			new GetFeedListDto(
 				feedList.get(2).feedId(),
 				feedList.get(2).contents(),
@@ -158,7 +151,7 @@ class FeedServiceTest {
 				feedList.get(2).userId(),
 				photoService.photos(feedList.get(2).feedId()),
 				likeService.likeCount(feedList.get(2).feedId()),
-				likeService.findLikeStatusByUserId(feedList.get(2).feedId(), alreadySignUpForm.getId()),
+				likeService.findLikeStatusByUserId(feedList.get(2).feedId(), 1),
 				commentService.comment(feedList.get(0).feedId(), 0, 30)
 			));
 	}
@@ -182,7 +175,7 @@ class FeedServiceTest {
 
 		assertThat(feedService.findByFeedId(notWriteFeed.getId())).isEqualTo(
 			Optional.of(new Feed(notWriteFeed.getId(), notWriteFeed.getContents(), null,
-				alreadySignUpForm.getId(), null, null)));
+				1, null, null)));
 	}
 
 	@Test
@@ -191,12 +184,12 @@ class FeedServiceTest {
 		//when
 		assertDoesNotThrow(() -> feedService.write(notWriteFeed));
 
-		FeedDto feedDto = new FeedDto(notWriteFeed.getId(), List.of(image1, image2), alreadySignUpForm.getId());
+		FeedDto feedDto = new FeedDto(notWriteFeed.getId(), List.of(image1, image2), 1);
 
 		assertDoesNotThrow(() -> photoService.insertImage(feedDto));
 		assertThat(feedService.findByFeedId(notWriteFeed.getId())).isEqualTo(
 			Optional.of(new Feed(notWriteFeed.getId(), notWriteFeed.getContents(), null,
-				alreadySignUpForm.getId(), null, null)));
+				1, null, null)));
 	}
 
 	@Test
@@ -205,12 +198,12 @@ class FeedServiceTest {
 		//when
 		assertDoesNotThrow(() -> feedService.write(feedWithPhoto));
 
-		FeedDto feedDto = new FeedDto(notWriteFeed.getId(), List.of(image1, image2), alreadySignUpForm.getId());
+		FeedDto feedDto = new FeedDto(notWriteFeed.getId(), List.of(image1, image2), 1);
 
 		assertDoesNotThrow(() -> photoService.insertImage(feedDto));
 		assertThat(feedService.findByFeedId(feedWithPhoto.getId())).isEqualTo(
 			Optional.of(
-				new Feed(feedWithPhoto.getId(), feedWithPhoto.getContents(), null, alreadySignUpForm.getId(),
+				new Feed(feedWithPhoto.getId(), feedWithPhoto.getContents(), null, 1,
 					null,
 					null)));
 	}
@@ -219,7 +212,7 @@ class FeedServiceTest {
 	@DisplayName("피드 수정 실패: 존재하지 않는 피드")
 	void feed_update_fail() {
 		CustomException customException = assertThrows(CustomException.class,
-			() -> feedService.update(UPDATE_CONTENT, null, alreadySignUpForm.getId(), notWriteFeed.getId()));
+			() -> feedService.update(UPDATE_CONTENT, null, 1, notWriteFeed.getId()));
 		assertThat(StatusEnum.FEED_NOT_FOUND).isEqualTo(customException.getStatusEnum());
 	}
 
@@ -227,7 +220,7 @@ class FeedServiceTest {
 	@DisplayName("피드 삭제 실패: 존재하지 않는 피드")
 	void feed_delete_fail() {
 		CustomException customException = assertThrows(CustomException.class,
-			() -> feedService.delete(alreadySignUpForm.getId(), notWriteFeed.getId()));
+			() -> feedService.delete(1, notWriteFeed.getId()));
 		assertThat(StatusEnum.FEED_NOT_FOUND).isEqualTo(customException.getStatusEnum());
 	}
 

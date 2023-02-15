@@ -1,5 +1,6 @@
 package com.example.caloriecounter.feed.controller;
 
+import static com.example.caloriecounter.user.source.TestUserSource.alreadyLoginForm;
 import static com.example.caloriecounter.util.CustomResponse.ERROR;
 import static com.example.caloriecounter.util.CustomResponse.SUCCESS;
 import static org.hamcrest.Matchers.is;
@@ -24,6 +25,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.caloriecounter.comment.controller.request.CommentRequestDto;
 import com.example.caloriecounter.comment.service.CommentService;
@@ -31,8 +33,6 @@ import com.example.caloriecounter.feed.controller.dto.request.FeedDto;
 import com.example.caloriecounter.feed.service.FeedService;
 import com.example.caloriecounter.like.service.LikeService;
 import com.example.caloriecounter.photo.service.PhotoService;
-import com.example.caloriecounter.user.controller.dto.request.LoginForm;
-import com.example.caloriecounter.user.controller.dto.request.SignUpForm;
 import com.example.caloriecounter.user.controller.dto.response.ResponseIssuedToken;
 import com.example.caloriecounter.user.service.UserService;
 import com.example.caloriecounter.util.StatusEnum;
@@ -69,17 +69,12 @@ class FeedControllerTest {
 
 	private ResponseIssuedToken responseIssuedToken;
 
-	private final SignUpForm wrongSignUpForm = new SignUpForm("wrongUser", "유저1의이름", "asdf1234", "dudwls0505@nate.com");
-	private final SignUpForm alreadySignUpForm = new SignUpForm("mockUser", "이영진", "asdf1234", "dudwls0505@naver.com");
-	private final LoginForm alreadyLoginForm = new LoginForm("mockUser", "asdf1234");
+	private final MockMultipartFile image1 = new MockMultipartFile("photos", "photos", "image/jpeg",
+		"photos".getBytes());
+	private final MockMultipartFile image2 = new MockMultipartFile("photos", "photos2", "image/jpeg",
+		"photos2".getBytes());
 
-	MockMultipartFile image1 = new MockMultipartFile("photos", "photos", "image/jpeg", "photos".getBytes());
-	MockMultipartFile image2 = new MockMultipartFile("photos", "photos2", "image/jpeg", "photos2".getBytes());
-
-	FeedDto notWriteFeed = new FeedDto("게시글내용1", List.of(this.image1, this.image2),
-		alreadySignUpForm.getId());
-	FeedDto feedWithContents = new FeedDto("게시글내용1", alreadySignUpForm.getId());
-	FeedDto feedWithPhoto = new FeedDto(List.of(this.image1, this.image2), alreadySignUpForm.getId());
+	private final FeedDto notWriteFeed = new FeedDto("게시글내용1", List.of(this.image1, this.image2), 1);
 
 	record FeedTestDto(String contents) {
 	}
@@ -102,9 +97,9 @@ class FeedControllerTest {
 	@Test
 	@DisplayName("피드 수정 성공: 수정내용에 image, contents 둘다 있음")
 	void feed_update_test() throws Exception {
-		feedService.write(feedWithContents);
+		feedService.write(createFeed("게시글내용1", 1));
 
-		MockMultipartHttpServletRequestBuilder builder = multipart("/feeds/" + feedWithContents.getId());
+		MockMultipartHttpServletRequestBuilder builder = multipart("/feeds/1");
 		builder.with(request -> {
 			request.setMethod("PUT");
 			return request;
@@ -123,9 +118,9 @@ class FeedControllerTest {
 	@Test
 	@DisplayName("피드 수정 성공: 수정내용에 contents만 있음")
 	void feed_update_test2() throws Exception {
-		feedService.write(feedWithContents);
+		feedService.write(createFeed("게시글내용1", 1));
 
-		MockMultipartHttpServletRequestBuilder builder = multipart("/feeds/" + feedWithContents.getId());
+		MockMultipartHttpServletRequestBuilder builder = multipart("/feeds/1");
 		builder.with(request -> {
 			request.setMethod("PUT");
 			return request;
@@ -142,9 +137,9 @@ class FeedControllerTest {
 	@Test
 	@DisplayName("피드 수정 성공: 수정내용에 image만 있음")
 	void feed_update_test5() throws Exception {
-		feedService.write(feedWithContents);
+		feedService.write(createFeed("게시글내용1", 1));
 
-		MockMultipartHttpServletRequestBuilder builder = multipart("/feeds/" + feedWithContents.getId());
+		MockMultipartHttpServletRequestBuilder builder = multipart("/feeds/1");
 		builder.with(request -> {
 			request.setMethod("PUT");
 			return request;
@@ -162,9 +157,9 @@ class FeedControllerTest {
 	@Test
 	@DisplayName("피드 수정 실패 : 수정내용에 내용, 이미지 모두 비어있는경우")
 	void feed_update_test4() throws Exception {
-		feedService.write(feedWithContents);
+		feedService.write(createFeed("게시글내용1", 1));
 
-		MockMultipartHttpServletRequestBuilder builder = multipart("/feeds/" + feedWithContents.getId());
+		MockMultipartHttpServletRequestBuilder builder = multipart("/feeds/1");
 		builder.with(request -> {
 			request.setMethod("PUT");
 			return request;
@@ -182,9 +177,9 @@ class FeedControllerTest {
 	@Test
 	@DisplayName("피드 삭제 성공 : 로그인 한 유저")
 	void feed_delete_success() throws Exception {
-		feedService.write(feedWithContents);
+		feedService.write(createFeed("게시글내용1", 1));
 
-		mockMvc.perform(delete("/feeds/" + feedWithContents.getId())
+		mockMvc.perform(delete("/feeds/1")
 				.header(AUTHORIZATION_HEADER, AUTHORIZATION_BEARER + responseIssuedToken.accessToken())
 				.contentType(MediaType.APPLICATION_JSON))
 			.andDo(print())
@@ -194,6 +189,8 @@ class FeedControllerTest {
 	@Test
 	@DisplayName("피드 조회 성공: cursor가 0보다 작으면 maxId값을 준다.")
 	void feed_read_fail() throws Exception {
+		final FeedDto feedWithContents = createFeed("게시글내용1", 1);
+		final FeedDto feedWithPhoto = createFeed(List.of(this.image1, this.image2), 1);
 		feedService.write(feedWithContents);
 		feedService.write(feedWithPhoto);
 		feedService.write(feedWithPhoto);
@@ -212,21 +209,23 @@ class FeedControllerTest {
 	@Test
 	@DisplayName("피드 조회 성공: 좋아요개수,좋아요상태, 사진, 글내용,댓글, 대댓글")
 	void feed_read_success() throws Exception {
+		final FeedDto feedWithContents = createFeed("게시글내용1", 1);
+		final FeedDto feedWithPhoto = createFeed(List.of(this.image1, this.image2), 1);
 		feedService.write(feedWithContents);
 		feedService.write(feedWithPhoto);
 		feedService.write(feedWithPhoto);
 
-		likeService.like(feedWithContents.getId(), alreadySignUpForm.getId());
-		commentService.insertComment(feedWithContents.getId(), alreadySignUpForm.getId(), new CommentRequestDto("댓글1"));
-		commentService.insertComment(feedWithContents.getId(), alreadySignUpForm.getId(), new CommentRequestDto("댓글2"));
-		commentService.insertComment(feedWithContents.getId(), alreadySignUpForm.getId(), new CommentRequestDto("댓글3"));
-		commentService.insertReply(feedWithContents.getId(), alreadySignUpForm.getId(),
+		likeService.like(feedWithContents.getId(), 1);
+		commentService.insertComment(feedWithContents.getId(), 1, new CommentRequestDto("댓글1"));
+		commentService.insertComment(feedWithContents.getId(), 1, new CommentRequestDto("댓글2"));
+		commentService.insertComment(feedWithContents.getId(), 1, new CommentRequestDto("댓글3"));
+		commentService.insertReply(feedWithContents.getId(), 1,
 			new CommentRequestDto(4, "댓글1의답글1", 1L, 1));
-		commentService.insertReply(feedWithContents.getId(), alreadySignUpForm.getId(),
+		commentService.insertReply(feedWithContents.getId(), 1,
 			new CommentRequestDto(5, "댓글1의답글2", 1L, 1));
-		commentService.insertReply(feedWithContents.getId(), alreadySignUpForm.getId(),
+		commentService.insertReply(feedWithContents.getId(), 1,
 			new CommentRequestDto(6, "댓글1의답글1의답글1", 4L, 1));
-		commentService.insertReply(feedWithContents.getId(), alreadySignUpForm.getId(),
+		commentService.insertReply(feedWithContents.getId(), 1,
 			new CommentRequestDto(7, "댓글2의답글1", 2L, 2));
 
 		mockMvc.perform(get("/feeds?cursorNo=50&displayPerPage=3&commentPageNum=1&commentPerPage=30")
@@ -377,5 +376,13 @@ class FeedControllerTest {
 				.contentType(MediaType.APPLICATION_JSON))
 			.andDo(print())
 			.andExpect(status().isNotFound());
+	}
+
+	private FeedDto createFeed(final List<MultipartFile> images, final long userId) {
+		return new FeedDto(images, userId);
+	}
+
+	private FeedDto createFeed(final String contents, final long userId) {
+		return new FeedDto(contents, userId);
 	}
 }

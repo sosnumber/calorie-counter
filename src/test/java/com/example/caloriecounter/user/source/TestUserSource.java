@@ -4,9 +4,14 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.params.provider.Arguments;
 
+import com.example.caloriecounter.user.controller.dto.request.LoginForm;
 import com.example.caloriecounter.user.controller.dto.request.SignUpForm;
 
 public class TestUserSource {
+
+	public static final SignUpForm alreadySignUpForm = new SignUpForm("mockUser", "이영진", "asdf1234",
+		"dudwls0505@naver.com");
+	public static final LoginForm alreadyLoginForm = new LoginForm("mockUser", "asdf1234");
 
 	static final SignUpForm 일반사용자_가입폼_케이스1 = new SignUpForm(
 		"asdf123545",

@@ -54,4 +54,8 @@ public class UserService {
 			this.userCacheService.getUser(userId).orElseGet(() -> this.userRepository.findByUserId(userId).orElse(null)
 			));
 	}
+
+	public void deleteAll() {
+		this.userRepository.deleteAll();
+	}
 }

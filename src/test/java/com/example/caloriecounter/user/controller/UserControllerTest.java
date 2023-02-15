@@ -1,5 +1,7 @@
 package com.example.caloriecounter.user.controller;
 
+import static com.example.caloriecounter.user.source.TestUserSource.alreadyLoginForm;
+import static com.example.caloriecounter.user.source.TestUserSource.alreadySignUpForm;
 import static com.example.caloriecounter.util.CustomResponse.ERROR;
 import static com.example.caloriecounter.util.CustomResponse.SUCCESS;
 import static org.hamcrest.Matchers.is;
@@ -44,23 +46,24 @@ class UserControllerTest {
 		"dudwls0505@nate.com"
 	);
 
-	private final SignUpForm alreadySignUpForm = new SignUpForm(
-		"mockUser",
-		"이영진",
-		"asdf1234",
-		"dudwls0505@naver.com"
-	);
-
-	private final LoginForm alreadyLoginForm = new LoginForm(
-		alreadySignUpForm.getUserId(),
-		alreadySignUpForm.getUserPassword()
-	);
-
 	private final SignUpForm wrongInputForm = new SignUpForm(
 		"wrongUserId",
 		"잘못된유저",
 		"1",
 		"2"
+	);
+
+	private final LoginForm wrongLoginForm = new LoginForm(
+		"join_wrongUserId",
+		null
+	);
+	private final LoginForm wrongPasswordLoginForm = new LoginForm(
+		alreadySignUpForm.getUserId(),
+		"wrongPassword234"
+	);
+	private final LoginForm notExistIdLoginForm = new LoginForm(
+		"notExistId",
+		rightSignUpForm.getUserPassword()
 	);
 
 	@Test
@@ -102,25 +105,12 @@ class UserControllerTest {
 			.andExpect(status().isConflict());
 	}
 
-	private final LoginForm wrongLoginForm = new LoginForm(
-		"join_wrongUserId",
-		null
-	);
-	private final LoginForm wrongPasswordLoginForm = new LoginForm(
-		alreadySignUpForm.getUserId(),
-		"wrongPassword234"
-	);
-	private final LoginForm notExistIdLoginForm = new LoginForm(
-		"notExistId",
-		rightSignUpForm.getUserPassword()
-	);
-
 	@Test
 	@DisplayName("로그인 성공")
 	void login_success_test() throws Exception {
 		mockMvc.perform(post("/login")
 				.contentType(APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(this.alreadyLoginForm)))
+				.content(objectMapper.writeValueAsString(alreadyLoginForm)))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("result").value(SUCCESS))
 			.andExpect(jsonPath("$.info.length()", is(3)))
