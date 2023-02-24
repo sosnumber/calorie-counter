@@ -1,0 +1,22 @@
+= calorie counter API
+:toc:
+
+== 피드 조회
+
+=== 요청
+
+include::{snippets}/index/http-request.adoc[]
+
+=== 요청 파라미터
+
+include::{snippets}/index/request-parameters.adoc[]
+
+=== 응답
+
+include::{snippets}/index/http-response.adoc[]
+
+include::{snippets}/index/response-fields.adoc[]
+
+=== CURL
+
+include::{snippets}/index/curl-request.adoc[]

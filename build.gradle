@@ -2,11 +2,11 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '2.7.7-SNAPSHOT'
     id 'io.spring.dependency-management' version '1.0.15.RELEASE'
-    id 'org.asciidoctor.convert' version '1.5.8'
+    id "org.asciidoctor.jvm.convert" version "3.3.2"
 }
 
 group = 'com.example'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.2-SNAPSHOT'
 sourceCompatibility = '17'
 
 repositories {
@@ -17,10 +17,18 @@ repositories {
 
 configurations {
     compile.exclude group: "org.slf4j", module: "slf4j-log4j12"
+    asciidoctorExt
+}
+
+// jar파일의 이름을 변경
+bootJar {
+    archiveFileName = 'calorie-counter.jar'
 }
 
 ext {
-    set('snippetsDir', file("build/generated-snippets"))
+    jwtVersion = "0.11.5"
+    asiidocVersion = "2.0.7.RELEASE"
+    snippetsDir = file('build/generated-snippets')
 }
 
 dependencies {
@@ -31,29 +39,56 @@ dependencies {
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.0'
     implementation 'javax.validation:validation-api:2.0.1.Final'
 
+    // 내장 레디스
     implementation group: 'it.ozimov', name: 'embedded-redis', version: '0.7.2'
 
-    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+    // RestDocs
+    asciidoctorExt "org.springframework.restdocs:spring-restdocs-asciidoctor:${asiidocVersion}"
+    testImplementation "org.springframework.restdocs:spring-restdocs-mockmvc:${asiidocVersion}"
 
+    // swagger
+    implementation 'io.springfox:springfox-boot-starter:3.0.0'
+    implementation 'io.springfox:springfox-swagger-ui:3.0.0'
+
+    // Jwt
+    implementation "io.jsonwebtoken:jjwt-api:${jwtVersion}"
+    runtimeOnly "io.jsonwebtoken:jjwt-impl:${jwtVersion}"
+    runtimeOnly "io.jsonwebtoken:jjwt-jackson:${jwtVersion}"
+
+    // 암호화
     implementation group: 'org.mindrot', name: 'jbcrypt', version: '0.4'
+
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:2.2.2'
     implementation 'com.h2database:h2'
-
     runtimeOnly 'com.mysql:mysql-connector-j'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 }
 
-tasks.named('test') {
+// restdocs
+test {
     outputs.dir snippetsDir
-    useJUnitPlatform()
 }
 
-tasks.named('asciidoctor') {
+// restdocs
+asciidoctor {
     inputs.dir snippetsDir
+    configurations 'asciidoctorExt'
     dependsOn test
+}
+
+// jar 생성할때 asiidoc도 같이 포함될수있도록 하는코드
+bootJar {
+    dependsOn asciidoctor
+
+    copy {
+        from asciidoctor.outputDir
+        into "src/main/resources/static/docs"
+    }
+}
+
+//빌드 할때 필요없는 plain.jar파일 생성안되기위함
+jar {
+    enabled = false
 }
