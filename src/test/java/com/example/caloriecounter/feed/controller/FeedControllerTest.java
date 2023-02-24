@@ -41,7 +41,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class FeedControllerTest {
+public class FeedControllerTest {
 	public static final String FEED_WRITE_URL = "/feeds";
 	public static final String AUTHORIZATION_HEADER = "Authorization";
 	public static final String AUTHORIZATION_BEARER = "Bearer ";

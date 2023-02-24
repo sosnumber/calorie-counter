@@ -1,4 +1,4 @@
-package com.example.caloriecounter.user.controller.dto.request;
+package com.example.caloriecounter.user.controller.dto.response;
 
 import org.springframework.http.HttpStatus;
 
