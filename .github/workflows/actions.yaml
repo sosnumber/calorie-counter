@@ -1,0 +1,49 @@
+name: calorie-counter CI
+
+on:
+  push:
+    branches:
+      - develop
+
+env:
+  S3_BUCKET_NAME: s3-calorie-counter
+  CODE_DEPLOY_APPLICATION_NAME:	CODE-DEPLOY-CALORIE-COUNTER
+  CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: CODE-DEPLOY-GROUP
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          
+      - name: Grant execute permission
+        run: chmod +x ./gradlew
+        shell: bash
+        
+      - name: Build with Gradle
+        run: ./gradlew build
+        shell: bash
+        
+      - name: Make zip 
+        run: zip -r ./$GITHUB_SHA .
+        shell: bash
+          
+      - name: Upload to S3
+        run: aws s3 cp --region ap-northeast-2 ./$GITHUB_SHA.zip s3://$S3_BUCKET_NAME/$GITHUB_SHA.zip
+        
+       - name: Code Deploy
+        run: |
+          aws deploy create-deployment \
+          --deployment-config-name CodeDeployDefault.AllAtOncee \
+          --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
+          --deployment-group-name ${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }}
+          --s3-location bucket=$S3_BUCKET_NAME,bundleType=zip,key=$GITHUB_SHA.zip        
+          
+      
