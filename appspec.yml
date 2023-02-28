@@ -2,7 +2,7 @@
 
 version: 0.0
 os: linux
-file:
+files:
   - source: /
     destination: /home/ec2-user/calorie-counter/step2/zip/
     overwrite: yes
