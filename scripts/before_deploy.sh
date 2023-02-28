@@ -1,4 +1,9 @@
 #!/bin/bash
+if [ -d /home/ec2-user/calorie-counter ]; then
+  sudo rm -rf /home/ec2-user/calorie-counter
+fi
+sudo mkdir -vp /home/ec2-user/calorie-counter
+
 PROJECT_NAME="calorie-counter"
 JAR_PATH="/home/ec2-user/calorie-counter/build/libs/*.jar"
 DEPLOY_PATH=/home/ec2-user/$PROJECT_NAME/
