@@ -1,6 +1,4 @@
 #!/bin/bash
-sudo rsync --delete-before --verbose --archive /home/ec2-user/calorie-counter / > /var/log/deploy.log
-
 PROJECT_NAME="calorie-counter"
 JAR_PATH="/home/ec2-user/calorie-counter/build/libs/*.jar"
 DEPLOY_PATH=/home/ec2-user/$PROJECT_NAME/
