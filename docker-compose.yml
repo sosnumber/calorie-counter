@@ -1,40 +1,40 @@
-version: "3.8"
-services:
-  calorie-counter-redis:
-    container_name: calorie-counter-redis
-    build:
-      dockerfile: Dockerfile
-      context: ./redis
-    image: leeyoungjin/calorie-counter-redis
-    ports:
-      - "6379:6379"
-  calorie-counter-database:
-    container_name: calorie-counter-database
-    build:
-      dockerfile: Dockerfile
-      context: ./database
-    image: leeyoungjin/calorie-counter-database
-    environment:
-      - MYSQL_DATABASE=calorie-counter
-      - MYSQL_ROOT_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
-    volumes:
-      - ./database/config:/etc/mysql/conf.d
-    ports:
-      - "3306:3306"
-
-  calorie-counter-app:
-    container_name: calorie-counter-app
-    build: .
-    depends_on:
-      - calorie-counter-database
-      - calorie-counter-redis
-    image: leeyoungjin/calorie-counter-app
-    environment:
-      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
-      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
-      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
-    volumes:
-      - ./database/config:/etc/mysql/conf.d
-    ports:
-      - "80:8080"
-    restart: always
+#version: "3.8"
+#services:
+#  calorie-counter-redis:
+#    container_name: calorie-counter-redis
+#    build:
+#      dockerfile: Dockerfile
+#      context: ./redis
+#    image: leeyoungjin/calorie-counter-redis
+#    ports:
+#      - "6379:6379"
+#  calorie-counter-database:
+#    container_name: calorie-counter-database
+#    build:
+#      dockerfile: Dockerfile
+#      context: ./database
+#    image: leeyoungjin/calorie-counter-database
+#    environment:
+#      - MYSQL_DATABASE=calorie-counter
+#      - MYSQL_ROOT_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+#    volumes:
+#      - ./database/config:/etc/mysql/conf.d
+#    ports:
+#      - "3306:3306"
+#
+#  calorie-counter-app:
+#    container_name: calorie-counter-app
+#    build: .
+#    depends_on:
+#      - calorie-counter-database
+#      - calorie-counter-redis
+#    image: leeyoungjin/calorie-counter-app
+#    environment:
+#      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
+#      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+#      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+#    volumes:
+#      - ./database/config:/etc/mysql/conf.d
+#    ports:
+#      - "80:8080"
+#    restart: always
