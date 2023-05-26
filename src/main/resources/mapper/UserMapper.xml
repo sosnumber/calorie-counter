@@ -33,6 +33,23 @@
         WHERE USER_ID = #{userId}
     </select>
 
+    <select id="findById" resultType="com.example.caloriecounter.user.domain.User">
+        SELECT ID,
+               user_id,
+               user_name,
+               user_password,
+               email,
+               weight,
+               withdrawal_reason,
+               join_date,
+               user_status,
+               user_type,
+               judge_status,
+               photo_link
+        FROM user_table
+        WHERE ID = #{id}
+    </select>
+
     <select id="getPassword" resultType="String">
         select USER_PASSWORD
         from USER_TABLE

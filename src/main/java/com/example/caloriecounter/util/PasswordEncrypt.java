@@ -1,17 +1,16 @@
 package com.example.caloriecounter.util;
 
 import org.mindrot.jbcrypt.BCrypt;
+import org.springframework.stereotype.Component;
 
-public final class PasswordEncrypt {
+@Component
+public class PasswordEncrypt {
 
-	private PasswordEncrypt() {
-	}
-
-	public static String encrypt(final String password) {
+	public String encrypt(final String password) {
 		return BCrypt.hashpw(password, BCrypt.gensalt());
 	}
 
-	public static boolean isMatch(final String password, final String hashedPassword) {
+	public boolean isMatch(final String password, final String hashedPassword) {
 		return BCrypt.checkpw(password, hashedPassword);
 	}
 }

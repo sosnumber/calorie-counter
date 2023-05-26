@@ -16,9 +16,10 @@ import lombok.RequiredArgsConstructor;
 public class UserRepository {
 
 	private final UserMapper userMapper;
+	private final PasswordEncrypt passwordEncrypt;
 
 	public void signUp(final SignUpForm signUpForm) {
-		signUpForm.setUserPassword(PasswordEncrypt.encrypt(signUpForm.getUserPassword()));
+		signUpForm.setUserPassword(passwordEncrypt.encrypt(signUpForm.getUserPassword()));
 		this.userMapper.signUp(signUpForm);
 	}
 
@@ -36,5 +37,9 @@ public class UserRepository {
 
 	public void deleteAll() {
 		this.userMapper.deleteAll();
+	}
+
+	public Optional<User> findById(final long id) {
+		return this.userMapper.findById(id);
 	}
 }

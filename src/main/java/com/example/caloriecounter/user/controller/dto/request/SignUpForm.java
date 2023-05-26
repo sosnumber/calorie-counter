@@ -5,6 +5,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
@@ -32,6 +33,7 @@ public class SignUpForm {
 		this(1, "", "", "", "");
 	}
 
+	@Builder
 	public SignUpForm(long id, String userId, String userName, String userPassword, String email) {
 		this.id = id;
 		this.userId = userId;

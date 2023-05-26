@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
 
 	private final UserRepository userRepository;
+	private final PasswordEncrypt passwordEncrypt;
 	private final TokenService tokenService;
 	private final UserCacheService userCacheService;
 
@@ -40,7 +41,7 @@ public class UserService {
 			.orElseThrow(() -> new CustomException(
 				StatusEnum.USER_NOT_FOUND, String.format("userId %s not exist", loginForm.userId())));
 
-		if (!PasswordEncrypt.isMatch(loginForm.userPassword(), this.userRepository.getPassword(loginForm.userId()))) {
+		if (!passwordEncrypt.isMatch(loginForm.userPassword(), this.userRepository.getPassword(loginForm.userId()))) {
 			throw new CustomException(StatusEnum.PASSWORD_NOT_MATCH);
 		}
 

@@ -19,4 +19,6 @@ public interface UserMapper {
 	String getPassword(final String userId);
 
 	void deleteAll();
+
+	Optional<User> findById(final long id);
 }

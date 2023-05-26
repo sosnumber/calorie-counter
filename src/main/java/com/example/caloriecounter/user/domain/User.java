@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 
+import lombok.Builder;
+
 public record User(
 	long id,
 	String userId,
@@ -23,5 +25,9 @@ public record User(
 	JudgeStatus judgeStatus,
 	String photoLink
 ) {
+
+	@Builder
+	public User {
+	}
 
 }
